@@ -6,16 +6,16 @@ import io.limkhashing.omdbmovie.data.mapper.toMovieEntity
 import io.limkhashing.omdbmovie.data.remote.api.MovieApi
 import io.limkhashing.omdbmovie.data.remote.response.SearchMoviesDTO
 import io.limkhashing.omdbmovie.domain.model.Movie
-import io.limkhashing.omdbmovie.domain.repository.MovieListRepository
+import io.limkhashing.omdbmovie.domain.repository.MoviesRepository
 import io.limkhashing.omdbmovie.presentation.ViewState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
-class MovieListRepositoryImpl @Inject constructor(
+class MoviesRepositoryImpl @Inject constructor(
     private val movieApi: MovieApi,
     private val movieDatabase: MovieDatabase
-) : MovieListRepository {
+) : MoviesRepository {
 
     override suspend fun getMovieList(
         forceFetchFromRemote: Boolean,

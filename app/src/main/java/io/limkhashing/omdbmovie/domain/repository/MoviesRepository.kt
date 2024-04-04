@@ -4,7 +4,7 @@ import io.limkhashing.omdbmovie.domain.model.Movie
 import io.limkhashing.omdbmovie.presentation.ViewState
 import kotlinx.coroutines.flow.Flow
 
-interface MovieListRepository {
+interface MoviesRepository {
 
     suspend fun getMovieList(
         forceFetchFromRemote: Boolean,
