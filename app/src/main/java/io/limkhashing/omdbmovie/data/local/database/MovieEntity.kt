@@ -7,7 +7,7 @@ import io.limkhashing.omdbmovie.domain.model.Movie
 @Entity
 data class MovieEntity(
     @PrimaryKey
-    val imdbID: String?,
+    val imdbID: String,
 
     val title: String?,
     val year: String?,

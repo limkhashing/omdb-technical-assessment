@@ -13,7 +13,7 @@ fun MovieDTO.toMovieEntity(
     poster: String?,
 ): MovieEntity {
     return MovieEntity(
-        imdbID = imdbID,
+        imdbID = imdbID ?: "",
         title = title,
         year = year,
         type = type,
