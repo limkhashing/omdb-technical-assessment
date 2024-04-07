@@ -3,6 +3,18 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     alias(libs.plugins.org.jetbrains.kotlin.kapt)
     alias(libs.plugins.hilt)
+    id("com.google.devtools.ksp")
+}
+
+kotlin {
+    sourceSets {
+        debug {
+            kotlin.srcDir("build/generated/ksp/debug/kotlin")
+        }
+        release {
+            kotlin.srcDir("build/generated/ksp/release/kotlin")
+        }
+    }
 }
 
 android {
@@ -90,11 +102,14 @@ dependencies {
     kapt("androidx.room:room-compiler:2.6.0")
     implementation("androidx.room:room-paging:2.6.0")
 
+    implementation("io.github.raamcosta.compose-destinations:core:v2.0.0-beta01")
+    ksp("io.github.raamcosta.compose-destinations:ksp:v2.0.0-beta01")
+
     // Voyager
-    val voyagerVersion = "1.0.0"
-    implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
-    implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
-    implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
+//    val voyagerVersion = "1.0.0"
+//    implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
+//    implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
+//    implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
 
     // Coil
     implementation("io.coil-kt:coil-compose:2.6.0")
