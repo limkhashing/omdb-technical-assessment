@@ -5,7 +5,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 
 data class MovieDetailsScreen(
-    val id: Int,
+    val imdbID: String?,
 ) : Screen {
 
     @Composable

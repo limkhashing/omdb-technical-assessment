@@ -22,6 +22,7 @@ chuckerNoOp = "4.0.0"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
+pagingCompose = "3.2.1"
 
 [libraries]
 # AndroidX
@@ -64,6 +65,7 @@ androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-co
 # Chucker
 chucker-library = { module = "com.github.chuckerteam.chucker:library", version.ref = "chucker" }
 chucker-library-no-op = { module = "com.github.chuckerteam.chucker:library-no-op", version.ref = "chuckerNoOp" }
+androidx-paging-compose = { group = "androidx.paging", name = "paging-compose", version.ref = "pagingCompose" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

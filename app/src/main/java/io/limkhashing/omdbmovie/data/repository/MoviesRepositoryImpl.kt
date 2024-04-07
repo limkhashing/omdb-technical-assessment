@@ -7,8 +7,10 @@ import io.limkhashing.omdbmovie.data.remote.api.MovieApi
 import io.limkhashing.omdbmovie.data.remote.response.SearchMoviesDTO
 import io.limkhashing.omdbmovie.domain.model.Movie
 import io.limkhashing.omdbmovie.domain.repository.MoviesRepository
+import io.limkhashing.omdbmovie.helper.NetworkHelper
 import io.limkhashing.omdbmovie.presentation.ViewState
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
@@ -17,18 +19,53 @@ class MoviesRepositoryImpl @Inject constructor(
     private val movieDatabase: MovieDatabase
 ) : MoviesRepository {
 
-    override suspend fun getMovieList(
-        forceFetchFromRemote: Boolean,
-        title: String,
+    override fun fetchMovieList(
+        searchKeyword: String,
         type: String,
         page: Int
     ): Flow<ViewState<List<Movie>>> {
         return flow {
             emit(ViewState.Loading)
 
-            val localMovieList = movieDatabase.movieDao.getMovieListByTitle(title)
-            val shouldLoadLocalMovie = localMovieList.isNotEmpty() && !forceFetchFromRemote
+            if (NetworkHelper.isNetworkConnected()) {
+                val movieListFromApi: SearchMoviesDTO = movieApi.getMoviesList(
+                    searchKeyword = searchKeyword,
+                    type = type,
+                    page = page
+                )
+                val movieEntities = movieListFromApi.search?.map { movieDTO ->
+                    movieDTO.toMovieEntity(
+                        imdbID = movieDTO.imdbID,
+                        title = movieDTO.title,
+                        year = movieDTO.year,
+                        type = movieDTO.type,
+                        poster = movieDTO.poster,
+                    )
+                }
+                if (movieEntities.isNullOrEmpty()) {
+                    throw Exception("No movies found")
+                }
+                movieDatabase.movieDao.insertMovieList(movieEntities)
+                emit(
+                    ViewState.Success(
+                        movieEntities.map {
+                            it.toMovie(
+                                imdbID = it.imdbID,
+                                title = it.title,
+                                year = it.year,
+                                type = it.type,
+                                poster = it.poster,
+                            )
+                        }
+                    )
+                )
+                return@flow
+            }
 
+
+            // If movie is already in database, return it
+            val localMovieList = movieDatabase.movieDao.getMovieListByTitle(searchKeyword)
+            val shouldLoadLocalMovie = localMovieList.isNotEmpty()
             if (shouldLoadLocalMovie) {
                 emit(
                     ViewState.Success(
@@ -45,61 +82,33 @@ class MoviesRepositoryImpl @Inject constructor(
                 )
                 return@flow
             }
-            
-            val movieListFromApi: SearchMoviesDTO = try {
-                movieApi.getMoviesList(
-                    searchKeyword = title,
-                    type = type,
-                    page = page
-                )
-            } catch (e: Exception) {
-                emit(ViewState.Error(exception = e))
-                return@flow
-            }
-            
-
-            val movieEntities = movieListFromApi.search?.map { movieDto ->
-                movieDto.toMovieEntity(
-                    imdbID = movieDto.imdbID,
-                    title = movieDto.title,
-                    year = movieDto.year,
-                    type = movieDto.type,
-                    poster = movieDto.poster,
-                )
-            }
-            
-            if (movieEntities.isNullOrEmpty()) {
-                emit(ViewState.Error(Exception("No movies found")))
-                return@flow
-            }
-            
-            movieDatabase.movieDao.insertMovieList(movieEntities)
-
-            emit(
-                ViewState.Success(
-                    movieEntities.map {
-                        it.toMovie(
-                            imdbID = it.imdbID,
-                            title = it.title,
-                            year = it.year,
-                            type = it.type,
-                            poster = it.poster,
-                        )
-                    }
-                )
-            )
+            throw Exception("No movies found")
+        }.catch { throwable ->
+            emit(ViewState.Error(exception = throwable as Exception))
         }
     }
 
-    override suspend fun getMovieDetails(imdbID: String): Flow<ViewState<Movie>> {
+    override fun fetchMovieDetails(imdbID: String): Flow<ViewState<Movie>> {
         return flow {
             emit(ViewState.Loading)
 
-            val movieEntity = movieDatabase.movieDao.getMovieById(imdbID)
-            if (movieEntity == null) {
-                emit(ViewState.Error(Exception("Movie not found")))
+            if (NetworkHelper.isNetworkConnected()) {
+                val movieDTO = movieApi.getMovieDetails(imdbID = imdbID)
+                val movieDetailsEntity = movieDTO?.toMovieEntity(
+                    imdbID = movieDTO.imdbID,
+                    title = movieDTO.title,
+                    year = movieDTO.year,
+                    type = movieDTO.type,
+                    poster = movieDTO.poster,
+                ) ?: throw Exception("Movie details not found")
+
+                // If movie is not in database, fetch it from API
+                movieDatabase.movieDao.insertMovieDetails(movieDetailsEntity)
                 return@flow
             }
+
+            // If movie is already in database, return it
+            val movieEntity = movieDatabase.movieDao.getMovieById(imdbID) ?: throw Exception("Movie details not found")
             emit(
                 ViewState.Success(
                     movieEntity.toMovie(
@@ -111,6 +120,8 @@ class MoviesRepositoryImpl @Inject constructor(
                     )
                 )
             )
+        }.catch { throwable ->
+            emit(ViewState.Error(exception = throwable as Exception))
         }
     }
 }

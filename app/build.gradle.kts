@@ -10,7 +10,7 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "io.limkhashing.seekmax"
+        applicationId = "io.limkhashing.omdbmovie"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
@@ -21,7 +21,7 @@ android {
             useSupportLibrary = true
         }
         defaultConfig {
-            testInstrumentationRunner = "io.limkhashing.seekmax.CustomTestRunner"
+            testInstrumentationRunner = "io.limkhashing.omdbmovie.CustomTestRunner"
         }
     }
 
@@ -73,6 +73,7 @@ dependencies {
     // Dependency Injection
     implementation(libs.hilt.android)
     implementation(libs.google.android.material)
+//    implementation(libs.androidx.paging.compose)
     kapt(libs.hilt.android.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
@@ -94,6 +95,9 @@ dependencies {
     implementation("cafe.adriel.voyager:voyager-navigator:$voyagerVersion")
     implementation("cafe.adriel.voyager:voyager-tab-navigator:$voyagerVersion")
     implementation("cafe.adriel.voyager:voyager-transitions:$voyagerVersion")
+
+    // Coil
+    implementation("io.coil-kt:coil-compose:2.6.0")
 
     // Unit testings
     testImplementation(libs.junit)
