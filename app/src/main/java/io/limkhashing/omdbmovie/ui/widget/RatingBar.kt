@@ -16,7 +16,7 @@ fun RatingBar(
     starsModifier: Modifier = Modifier,
     rating: Double = 0.0,
     stars: Int = 5,
-    starsColor: Color = Color.Yellow,
+    starsColor: Color = Color.Green,
 ) {
 
     val filledStars = kotlin.math.floor(rating).toInt()

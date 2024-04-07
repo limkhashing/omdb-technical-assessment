@@ -12,5 +12,5 @@ interface MoviesRepository {
         page: Int
     ): Flow<ViewState<List<Movie>>>
 
-    fun fetchMovieDetails(imdbID: String): Flow<ViewState<Movie>>
+    fun fetchMovieDetails(imdbID: String?): Flow<ViewState<Movie>>
 }

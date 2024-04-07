@@ -34,13 +34,7 @@ class MoviesRepositoryImpl @Inject constructor(
                     page = page
                 )
                 val movieEntities = movieListFromApi.search?.map { movieDTO ->
-                    movieDTO.toMovieEntity(
-                        imdbID = movieDTO.imdbID,
-                        title = movieDTO.title,
-                        year = movieDTO.year,
-                        type = movieDTO.type,
-                        poster = movieDTO.poster,
-                    )
+                    movieDTO.toMovieEntity()
                 }
                 if (movieEntities.isNullOrEmpty()) {
                     throw Exception("No movies found")
@@ -48,14 +42,8 @@ class MoviesRepositoryImpl @Inject constructor(
                 movieDatabase.movieDao.insertMovieList(movieEntities)
                 emit(
                     ViewState.Success(
-                        movieEntities.map {
-                            it.toMovie(
-                                imdbID = it.imdbID,
-                                title = it.title,
-                                year = it.year,
-                                type = it.type,
-                                poster = it.poster,
-                            )
+                        movieEntities.map { movieEntity ->
+                            movieEntity.toMovie()
                         }
                     )
                 )
@@ -64,19 +52,12 @@ class MoviesRepositoryImpl @Inject constructor(
 
 
             // If movie is already in database, return it
-            val localMovieList = movieDatabase.movieDao.getMovieListByTitle(searchKeyword)
-            val shouldLoadLocalMovie = localMovieList.isNotEmpty()
-            if (shouldLoadLocalMovie) {
+            val localMovieList = movieDatabase.movieDao.getMovieListLocally()
+            if (localMovieList.isNotEmpty()) {
                 emit(
                     ViewState.Success(
                         data = localMovieList.map { movieEntity ->
-                            movieEntity.toMovie(
-                                imdbID = movieEntity.imdbID,
-                                title = movieEntity.title,
-                                year = movieEntity.year,
-                                type = movieEntity.type,
-                                poster = movieEntity.poster,
-                            )
+                            movieEntity.toMovie()
                         }
                     )
                 )
@@ -88,22 +69,17 @@ class MoviesRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun fetchMovieDetails(imdbID: String): Flow<ViewState<Movie>> {
+    override fun fetchMovieDetails(imdbID: String?): Flow<ViewState<Movie>> {
         return flow {
             emit(ViewState.Loading)
 
             if (NetworkHelper.isNetworkConnected()) {
                 val movieDTO = movieApi.getMovieDetails(imdbID = imdbID)
-                val movieDetailsEntity = movieDTO?.toMovieEntity(
-                    imdbID = movieDTO.imdbID,
-                    title = movieDTO.title,
-                    year = movieDTO.year,
-                    type = movieDTO.type,
-                    poster = movieDTO.poster,
-                ) ?: throw Exception("Movie details not found")
-
+                val movieDetailsEntity = movieDTO?.toMovieEntity() ?: throw Exception("Movie details not found")
                 // If movie is not in database, fetch it from API
                 movieDatabase.movieDao.insertMovieDetails(movieDetailsEntity)
+
+                emit(ViewState.Success(movieDetailsEntity.toMovie()))
                 return@flow
             }
 
@@ -111,13 +87,7 @@ class MoviesRepositoryImpl @Inject constructor(
             val movieEntity = movieDatabase.movieDao.getMovieById(imdbID) ?: throw Exception("Movie details not found")
             emit(
                 ViewState.Success(
-                    movieEntity.toMovie(
-                        imdbID = movieEntity.imdbID,
-                        title = movieEntity.title,
-                        year = movieEntity.year,
-                        type = movieEntity.type,
-                        poster = movieEntity.poster,
-                    )
+                    movieEntity.toMovie()
                 )
             )
         }.catch { throwable ->

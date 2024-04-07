@@ -13,7 +13,12 @@ data class Movie(
     val title: String?,
     val year: String?,
     val type: MovieType?,
-    val poster: String?
+    val poster: String?,
+    val plot: String?,
+    val imdbRating: String?,
+    val imdbVotes: String?,
+    val language: String?,
+    val released: String?,
 ) {
     enum class MovieType {
         @SerializedName("movie")

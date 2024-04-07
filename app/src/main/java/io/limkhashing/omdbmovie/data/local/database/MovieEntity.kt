@@ -13,4 +13,10 @@ data class MovieEntity(
     val year: String?,
     val type: Movie.MovieType?,
     val poster: String?,
+    val plot: String?,
+
+    val imdbRating: String?,
+    val imdbVotes: String?,
+    val language: String?,
+    val released: String?,
 )

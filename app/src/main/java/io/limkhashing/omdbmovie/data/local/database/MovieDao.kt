@@ -13,8 +13,8 @@ interface MovieDao {
     suspend fun insertMovieDetails(movie: MovieEntity)
 
     @Query("SELECT * FROM MovieEntity WHERE imdbID = :imdbID")
-    suspend fun getMovieById(imdbID: String): MovieEntity?
+    suspend fun getMovieById(imdbID: String?): MovieEntity?
 
-    @Query("SELECT * FROM MovieEntity WHERE title LIKE :title")
-    suspend fun getMovieListByTitle(title: String): List<MovieEntity>
+    @Query("SELECT * FROM MovieEntity")
+    suspend fun getMovieListLocally(): List<MovieEntity>
 }
