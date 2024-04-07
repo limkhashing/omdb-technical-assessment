@@ -8,6 +8,7 @@ import io.limkhashing.omdbmovie.domain.repository.MoviesRepository
 import io.limkhashing.omdbmovie.presentation.ViewState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -20,39 +21,27 @@ class MoviesHomeViewModel @Inject constructor(
     private val _state = MutableStateFlow<ViewState<List<Movie>>>(ViewState.Idle)
     val state = _state.asStateFlow()
 
-    private var _movieListState = MutableStateFlow(MovieListState())
-    val movieListState = _movieListState.asStateFlow()
+    val movies = mutableListOf<Movie>()
 
     init {
-        fetchMovieList(searchKeyword = "Marvel")
-    }
-
-    fun onEvent(event: MovieListUiEvent) {
-        when (event) {
-            MovieListUiEvent.Navigate -> {}
-            is MovieListUiEvent.Paginate -> {
-                fetchMovieList(searchKeyword = "Marvel")
-            }
-        }
+        fetchMovieList(searchKeyword = "Marvel", page = 1)
     }
 
     fun fetchMovieList(
         searchKeyword: String,
         type: String = Movie.MovieType.Movie.name.lowercase(),
+        page: Int
     ) = viewModelScope.launch {
         val response = moviesRepository.fetchMovieList(
             searchKeyword = searchKeyword,
             type = type,
-            page = movieListState.value.page
+            page = page
         )
-        response.collect { viewState ->
+        response.collectLatest { viewState ->
             if (viewState is ViewState.Success) {
-                _movieListState.update {
-                    it.copy(
-                        totalMovieList = movieListState.value.totalMovieList + viewState.data.shuffled(),
-                        page = movieListState.value.page + 1
-                    )
-                }
+                movies.addAll(viewState.data.shuffled())
+                _state.value = ViewState.Success(movies)
+                return@collectLatest
             }
             _state.value = viewState
         }

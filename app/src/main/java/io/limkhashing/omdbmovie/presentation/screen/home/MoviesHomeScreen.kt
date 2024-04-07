@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -18,32 +17,43 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
+import io.limkhashing.omdbmovie.domain.model.Movie
+import io.limkhashing.omdbmovie.presentation.ViewState
 import io.limkhashing.omdbmovie.ui.component.MovieItem
 
 class MoviesHomeScreen : Screen {
 
+    private var page = 1
+
     @Composable
     override fun Content() {
         val viewModel = hiltViewModel<MoviesHomeViewModel>()
-        val state = viewModel.movieListState.collectAsStateWithLifecycle().value
+        val state = viewModel.state.collectAsStateWithLifecycle().value
 
         MoviesHomeContent(
             state = state,
-            onEvent = viewModel::onEvent
+            movies = viewModel.movies,
+            onPagination = {
+                page++
+                viewModel.fetchMovieList(searchKeyword = "Marvel", page = page)
+            }
         )
     }
 
     @Composable
     private fun MoviesHomeContent(
-        state: MovieListState,
-        onEvent: (MovieListUiEvent) -> Unit
+        state: ViewState<List<Movie>>,
+        movies: MutableList<Movie>,
+        onPagination: () -> Unit,
     ) {
         val navigator = LocalNavigator.current
 
         Box(
-            modifier = Modifier.fillMaxSize().fillMaxHeight(),
+            modifier = Modifier
+                .fillMaxSize()
+                .fillMaxHeight(),
         ) {
-            if (state.totalMovieList.isEmpty()) {
+            if (movies.isEmpty()) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)
                 )
@@ -53,20 +63,25 @@ class MoviesHomeScreen : Screen {
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(vertical = 8.dp, horizontal = 4.dp)
                 ) {
-                    items(state.totalMovieList.size) { index ->
+                    items(movies.size) { index ->
                         MovieItem(
-                            movie = state.totalMovieList[index],
+                            movie = movies[index],
                             navigator = navigator
                         )
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        if (index >= state.totalMovieList.size - 1) {
-                            onEvent(MovieListUiEvent.Paginate("Marvel"))
+                        if (index >= movies.size - 1 && !state.isLoading()) {
+                            onPagination.invoke()
+                        }
+                    }
+
+                    if (state.isLoading()) {
+                        item {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                         }
                     }
                 }
             }
         }
-
     }
 }

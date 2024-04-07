@@ -96,7 +96,6 @@ fun MovieItem(
 
         if (imageState is AsyncImagePainter.State.Success) {
             dominantColor = getAverageColor(imageBitmap = imageState.result.drawable.toBitmap().asImageBitmap())
-
             Image(
                 modifier = Modifier
                     .fillMaxWidth()
