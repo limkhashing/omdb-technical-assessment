@@ -24,6 +24,7 @@ class ProfileScreen : Screen {
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.current
+
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,

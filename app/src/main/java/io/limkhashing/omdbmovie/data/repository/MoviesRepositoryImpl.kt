@@ -73,23 +73,12 @@ class MoviesRepositoryImpl @Inject constructor(
         return flow {
             emit(ViewState.Loading)
 
-            if (NetworkHelper.isNetworkConnected()) {
-                val movieDTO = movieApi.getMovieDetails(imdbID = imdbID)
-                val movieDetailsEntity = movieDTO?.toMovieEntity() ?: throw Exception("Movie details not found")
-                // If movie is not in database, fetch it from API
-                movieDatabase.movieDao.insertMovieDetails(movieDetailsEntity)
+            // Here we only fetch movie details from API
+            val movieDTO = movieApi.getMovieDetails(imdbID = imdbID)
+            val movieDetailsEntity = movieDTO?.toMovieEntity() ?: throw Exception("Movie details not found")
+            movieDatabase.movieDao.insertMovieDetails(movieDetailsEntity)
 
-                emit(ViewState.Success(movieDetailsEntity.toMovie()))
-                return@flow
-            }
-
-            // If movie is already in database, return it
-            val movieEntity = movieDatabase.movieDao.getMovieById(imdbID) ?: throw Exception("Movie details not found")
-            emit(
-                ViewState.Success(
-                    movieEntity.toMovie()
-                )
-            )
+            emit(ViewState.Success(movieDetailsEntity.toMovie()))
         }.catch { throwable ->
             emit(ViewState.Error(exception = throwable as Exception))
         }

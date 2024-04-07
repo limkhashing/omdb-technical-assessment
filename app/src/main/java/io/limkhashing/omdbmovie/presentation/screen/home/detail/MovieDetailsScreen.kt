@@ -23,6 +23,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,8 +54,9 @@ data class MovieDetailsScreen(
     override fun Content() {
         val viewModel = hiltViewModel<MovieDetailsViewModel>()
         val state = viewModel.state.collectAsStateWithLifecycle().value
-        viewModel.fetchMovieDetails(imdbID = imdbID)
-
+        LaunchedEffect(Unit) {
+            viewModel.fetchMovieDetails(imdbID = imdbID)
+        }
         MovieDetailsContent(
             state = state
         )
@@ -124,7 +126,9 @@ data class MovieDetailsScreen(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Row(
-                            modifier = Modifier.fillMaxWidth().padding(16.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
                         ) {
                             Box(
                                 modifier = Modifier

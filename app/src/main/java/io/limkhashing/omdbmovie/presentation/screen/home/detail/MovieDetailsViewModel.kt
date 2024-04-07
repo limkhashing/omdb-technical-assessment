@@ -19,7 +19,6 @@ class MovieDetailsViewModel @Inject constructor(
     private val _state = MutableStateFlow<ViewState<Movie>>(ViewState.Idle)
     val state = _state.asStateFlow()
 
-
     fun fetchMovieDetails(imdbID: String?) = viewModelScope.launch {
         val response = moviesRepository.fetchMovieDetails(
             imdbID = imdbID
