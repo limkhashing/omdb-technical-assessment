@@ -8,6 +8,7 @@ import io.limkhashing.omdbmovie.domain.repository.MoviesRepository
 import io.limkhashing.omdbmovie.presentation.ViewState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -22,18 +23,13 @@ class MoviesHomeViewModel @Inject constructor(
     private var _movieListState = MutableStateFlow(MovieListState())
     val movieListState = _movieListState.asStateFlow()
 
-//    val totalMovieList = mutableListOf<Movie>()
-
     init {
         fetchMovieList(searchKeyword = "Marvel")
     }
 
     fun onEvent(event: MovieListUiEvent) {
         when (event) {
-            MovieListUiEvent.Navigate -> {
-
-            }
-
+            MovieListUiEvent.Navigate -> {}
             is MovieListUiEvent.Paginate -> {
                 fetchMovieList(searchKeyword = "Marvel")
             }
@@ -51,7 +47,12 @@ class MoviesHomeViewModel @Inject constructor(
         )
         response.collect { viewState ->
             if (viewState is ViewState.Success) {
-                totalMovieList.addAll(viewState.data)
+                _movieListState.update {
+                    it.copy(
+                        totalMovieList = movieListState.value.totalMovieList + viewState.data.shuffled(),
+                        page = movieListState.value.page + 1
+                    )
+                }
             }
             _state.value = viewState
         }
