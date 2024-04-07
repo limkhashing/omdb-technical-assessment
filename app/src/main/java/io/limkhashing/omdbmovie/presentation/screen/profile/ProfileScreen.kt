@@ -14,16 +14,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import io.limkhashing.omdbmovie.presentation.screen.login.LoginScreen
 import io.limkhashing.omdbmovie.ui.theme.ButtonColor
 
-class ProfileScreen : Screen {
+class ProfileScreen(private val onLogoutSuccess: () -> Unit) : Screen {
 
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.current
+        val viewModel = hiltViewModel<ProfileViewModel>()
 
         Column(
             verticalArrangement = Arrangement.Center,
@@ -33,7 +35,9 @@ class ProfileScreen : Screen {
 
             Button(
                 onClick = {
+                    viewModel.clearSession()
                     navigator?.replaceAll(LoginScreen())
+                    onLogoutSuccess.invoke()
                 },
                 shape = RoundedCornerShape(5.dp),
                 modifier = Modifier.fillMaxWidth().background(ButtonColor)
@@ -47,5 +51,5 @@ class ProfileScreen : Screen {
 @Composable
 @Preview(showBackground = true, showSystemUi = true)
 fun ProfileScreenPreview() {
-    ProfileScreen()
+    ProfileScreen(onLogoutSuccess = {})
 }

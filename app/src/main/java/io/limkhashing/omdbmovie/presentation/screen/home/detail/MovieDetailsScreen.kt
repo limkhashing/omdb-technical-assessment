@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
+import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
@@ -182,11 +183,11 @@ data class MovieDetailsScreen(
                                     ) {
                                         RatingBar(
                                             starsModifier = Modifier.size(18.dp),
-                                            rating = movie.imdbRating?.toDouble() ?: 0.0
+                                            rating = (movie.imdbRating?.toDouble() ?: 0.0) / 2
                                         )
                                         Text(
                                             modifier = Modifier.padding(start = 4.dp),
-                                            text = movie.imdbVotes ?: "",
+                                            text = movie.imdbRating ?: "",
                                             color = Color.LightGray,
                                             fontSize = 14.sp,
                                             maxLines = 1,

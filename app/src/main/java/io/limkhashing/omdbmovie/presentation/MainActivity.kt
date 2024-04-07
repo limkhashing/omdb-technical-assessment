@@ -3,9 +3,13 @@ package io.limkhashing.omdbmovie.presentation
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
@@ -15,6 +19,10 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -26,7 +34,6 @@ import cafe.adriel.voyager.navigator.tab.TabNavigator
 import cafe.adriel.voyager.transitions.SlideTransition
 import dagger.hilt.android.AndroidEntryPoint
 import io.limkhashing.omdbmovie.presentation.screen.home.HomeTab
-import io.limkhashing.omdbmovie.presentation.screen.home.MoviesHomeScreen
 import io.limkhashing.omdbmovie.presentation.screen.login.LoginScreen
 import io.limkhashing.omdbmovie.presentation.screen.login.LoginViewModel
 import io.limkhashing.omdbmovie.presentation.screen.profile.ProfileTab
@@ -41,33 +48,48 @@ class MainActivity : ComponentActivity() {
             MoviesAppTheme {
                 val viewModel = hiltViewModel<LoginViewModel>()
                 if (viewModel.getJwtSession().isNullOrBlank()) {
-                    Navigator(screen =  LoginScreen()) { navigator ->
-                        Scaffold { innerPadding: PaddingValues ->
-                            SlideTransition(
-                                navigator = navigator,
-                                modifier = Modifier.padding(innerPadding)
-                            )
-                        }
-                    }
+                    Navigator(screen =  LoginScreen())
                 } else {
-                    TabNavigator(HomeTab) {
-                        Scaffold(
-                            content = {
-                                CurrentTab()
-                            },
-                            bottomBar = {
-                                BottomNavigation {
-                                    TabNavigationItem(HomeTab)
-                                    TabNavigationItem(ProfileTab)
-                                }
-                            }
-                        )
-                    }
+                    MainTabNavigation()
                 }
             }
         }
     }
 }
+
+@Composable
+fun MainTabNavigation() {
+    var isVisible by remember { mutableStateOf(true) }
+    val homeTab = HomeTab(
+        onChangeBottomTabState = { isVisible = it }
+    )
+    val profileTab = ProfileTab(
+        onChangeBottomTabState = { isVisible = it }
+    )
+
+    TabNavigator(tab = homeTab) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            bottomBar = {
+                AnimatedVisibility(
+                    visible = isVisible,
+                    enter = slideInVertically { height ->
+                        height
+                    },
+                    exit = slideOutVertically { height ->
+                        height
+                    }) {
+                    BottomNavigation {
+                        TabNavigationItem(homeTab)
+                        TabNavigationItem(profileTab)
+                    }
+                }
+            },
+            content = { CurrentTab() },
+        )
+    }
+}
+
 
 @Composable
 private fun RowScope.TabNavigationItem(tab: Tab) {

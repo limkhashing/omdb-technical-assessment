@@ -22,15 +22,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.LocalNavigator
 import io.limkhashing.omdbmovie.helper.Logger
-import io.limkhashing.omdbmovie.presentation.screen.home.MoviesHomeScreen
+import io.limkhashing.omdbmovie.presentation.MainTabNavigation
 import io.limkhashing.omdbmovie.ui.theme.ButtonColor
 import io.limkhashing.omdbmovie.ui.theme.MoviesAppTheme
 import io.limkhashing.omdbmovie.ui.widget.CustomLoadingDialog
@@ -41,7 +41,6 @@ class LoginScreen : Screen {
 
     @Composable
     override fun Content() {
-        val navigator = LocalNavigator.current
         val context = LocalContext.current.applicationContext
 
         val viewModel = hiltViewModel<LoginViewModel>()
@@ -54,7 +53,7 @@ class LoginScreen : Screen {
             },
             onSuccess = {
                 viewModel.setJwtSession(state.getSuccessDataOrNull())
-                navigator?.replaceAll(MoviesHomeScreen())
+                MainTabNavigation()
             },
             onError = {
                 LaunchedEffect(Unit) {
@@ -63,12 +62,13 @@ class LoginScreen : Screen {
                 }
             }
         )
+
+        if (!viewModel.getJwtSession().isNullOrBlank()) return
+
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 30.dp)
+            modifier = Modifier.fillMaxSize().padding(horizontal = 30.dp)
         ) {
             LoginField(
                 value = credentials.username,
@@ -104,7 +104,7 @@ class LoginScreen : Screen {
                     .background(ButtonColor)
                     .alpha(if (credentials.isEmpty()) 0.5f else 1f)
             ) {
-                Text("Login")
+                Text("Login", color = Color.White)
             }
         }
     }

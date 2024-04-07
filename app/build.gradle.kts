@@ -28,6 +28,7 @@ android {
     buildTypes {
         debug {
             isDebuggable = true
+            this.buildConfigField("String", "OMDB_API_KEY", "\"" + System.getenv("OMDB_API_KEY") + "\"")
         }
         release {
             isMinifyEnabled = false

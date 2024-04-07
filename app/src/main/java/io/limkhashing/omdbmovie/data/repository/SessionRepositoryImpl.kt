@@ -14,12 +14,12 @@ class SessionRepositoryImpl(
     override fun authenticateUser(username: String, password: String): Flow<ViewState<String>> = flow {
         emit(ViewState.Loading)
         delay(2000) // TODO replace with actual API call, and store the JWT in SessionManager
-        emit(ViewState.Success("Success"))
-//        if (username == "VVVBB" && password == "@bcd1234") { // TODO currently hardcoded username and password for testing
-//            emit(ViewState.Success("Success"))
-//        } else {
-//            emit(ViewState.Error(Exception("Invalid credentials")))
-//        }
+//        emit(ViewState.Success("Success"))
+        if (username == "VVVBB" && password == "@bcd1234") { // TODO currently hardcoded username and password for testing
+            emit(ViewState.Success("Success"))
+        } else {
+            emit(ViewState.Error(Exception("Invalid credentials")))
+        }
     }
 
     override fun getJwtSession(): String? {

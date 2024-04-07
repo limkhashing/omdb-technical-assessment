@@ -10,7 +10,19 @@ import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import cafe.adriel.voyager.transitions.SlideTransition
 
-object ProfileTab : Tab {
+class ProfileTab(
+    @Transient
+    val onChangeBottomTabState : (showBottomTab : Boolean) -> Unit,
+) : Tab {
+
+    @Composable
+    override fun Content() {
+        Navigator(screen = ProfileScreen(onLogoutSuccess = {
+            onChangeBottomTabState(false)
+        })) { navigator ->
+            SlideTransition(navigator = navigator)
+        }
+    }
 
     override val options: TabOptions
         @Composable
@@ -26,11 +38,4 @@ object ProfileTab : Tab {
                 )
             }
         }
-
-    @Composable
-    override fun Content() {
-        Navigator(screen = ProfileScreen()) { navigator ->
-            SlideTransition(navigator = navigator)
-        }
-    }
 }
